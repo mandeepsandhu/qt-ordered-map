@@ -3,21 +3,21 @@ qt-ordered-map
 
 A **Qt** based implementation of an *ordered map*.
 
-An ordered map stores key-value pairs according to the *insertion order*. It supports a sub-set of the **QMap** API, as certain APIs like <code>QMap::insertMulti()</code> etc do not make sense for an ordered map.
+An ordered map stores key-value pairs according to the *insertion order* of the keys. It supports a sub-set of the **QMap** API, as certain APIs like <code>QMap::insertMulti()</code> etc do not make sense for an ordered map.
 
 <code>OrderedMap</code> stores keys according to their insertion order, so if you add a key that already exists, it's order is changed to being the last key in the map. Eg:
 
-    ```C++
-    #include "orderedmap.h"
-    ...
-    OrderedMap<int, int> om;
-    om.insert(1,1);
-    om.insert(2,2);
-    // Order of keys is [1, 2]
-    
-    om.insert(1,1);
-    // Order of keys is [2, 1]
-    ```
+```C++
+#include "orderedmap.h"
+...
+OrderedMap<int, int> om;
+om.insert(1,1);
+om.insert(2,2);
+// Order of keys is [1, 2]
+
+om.insert(1,1);
+// Order of keys is [2, 1]
+```
 
 Requirements
 ============
