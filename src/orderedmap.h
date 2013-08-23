@@ -2,9 +2,9 @@
 #define ORDEREDMAP_H
 
 #include <QHash>
-#include <QMap>
-#include <QPair>
+#include <QLinkedList>
 #include <QList>
+#include <QPair>
 
 template <typename Key> inline bool oMHashEqualToKey(const Key &key1, const Key &key2)
 {
@@ -28,6 +28,9 @@ template <typename Key, typename Value>
 class OrderedMap
 {
 
+    typedef typename QLinkedList<Key>::iterator qllIterator;
+    typedef QPair<Value, qllIterator> OMHashValue;
+
 public:
     explicit OrderedMap();
 
@@ -43,11 +46,7 @@ public:
 
     bool isEmpty() const;
 
-//    const Key key(const Value &value) const;
-
-//    const Key key(const Value &value, const Key &defaultKey) const;
-
-    QList<Key> keys() const;
+    std::list<Key> keys() const;
 
     int remove(const Key &key);
 
@@ -77,7 +76,7 @@ public:
 
 private:
 
-    class OMHash : public QHash<Key, QPair<Value, int> >
+    class OMHash : public QHash<Key, OMHashValue >
     {
     public:
         bool operator == (const OMHash &other) const
@@ -86,16 +85,16 @@ private:
                 return false;
             }
 
-            if (QHash<Key, QPair<Value, int> >::operator ==(other)) {
+            if (QHash<Key, OMHashValue >::operator ==(other)) {
                 return true;
             }
 
-            typename QHash<Key, QPair<Value, int> >::const_iterator it1 = this->constBegin();
-            typename QHash<Key, QPair<Value, int> >::const_iterator it2 = other.constBegin();
+            typename QHash<Key, OMHashValue >::const_iterator it1 = this->constBegin();
+            typename QHash<Key, OMHashValue >::const_iterator it2 = other.constBegin();
 
             while(it1 != this->end()) {
-                QPair<Value, int> v1 = it1.value();
-                QPair<Value, int> v2 = it2.value();
+                OMHashValue v1 = it1.value();
+                OMHashValue v2 = it2.value();
 
                 if ((v1.first != v2.first) || !oMHashEqualToKey<Key>(it1.key(), it2.key())) {
                     return false;
@@ -110,22 +109,17 @@ private:
 private:
 
     OMHash data;
-    QMap<quint32, Key> insertOrder;
-    quint32 counter;
+    QLinkedList<Key> insertOrder;
 };
 
 template <typename Key, typename Value>
-OrderedMap<Key, Value>::OrderedMap()
-{
-    counter = 0;
-}
+OrderedMap<Key, Value>::OrderedMap() {}
 
 template <typename Key, typename Value>
 void OrderedMap<Key, Value>::clear()
 {
     data.clear();
     insertOrder.clear();
-    counter = 0;
 }
 
 template <typename Key, typename Value>
@@ -152,21 +146,19 @@ void OrderedMap<Key, Value>::insert(const Key &key, const Value &value)
     typename OMHash::iterator it = data.find(key);
     if (it == data.end()) {
         // New key
-        QPair<Value, int> pair(value, counter);
+        qllIterator ioIter = insertOrder.insert(insertOrder.end(), key);
+        OMHashValue pair(value, ioIter);
         data.insert(key, pair);
-        insertOrder.insert(counter, key);
-        counter++;
         return;
     }
 
-    QPair<Value, int> pair = it.value();
-    quint32 oldCounter = pair.second;
+    OMHashValue pair = it.value();
+    // remove old reference
+    insertOrder.erase(pair.second);
+    // Add new reference
+    qllIterator ioIter = insertOrder.insert(insertOrder.end(), key);
     pair.first = value;
-    pair.second = counter;
-
-    insertOrder.remove(oldCounter);
-    insertOrder.insert(counter, key);
-    counter++;
+    pair.second = ioIter;
 }
 
 template <typename Key, typename Value>
@@ -176,9 +168,9 @@ bool OrderedMap<Key, Value>::isEmpty() const
 }
 
 template<typename Key, typename Value>
-QList<Key> OrderedMap<Key, Value>::keys() const
+std::list<Key> OrderedMap<Key, Value>::keys() const
 {
-    return insertOrder.values();
+    return insertOrder.toStdList();
 }
 
 template<typename Key, typename Value>
@@ -188,9 +180,10 @@ int OrderedMap<Key, Value>::remove(const Key &key)
     if (it == data.end()) {
         return 0;
     }
-    QPair<Value, int> pair = it.value();
+    OMHashValue pair = it.value();
+    insertOrder.erase(pair.second);
     data.erase(it);
-    return insertOrder.remove(pair.second);
+    return 1;
 }
 
 template<typename Key, typename Value>
@@ -206,7 +199,6 @@ void OrderedMap<Key, Value>::swap(OrderedMap<Key, Value> &other)
     // Swap individual components
     data.swap(other.data);
     insertOrder.swap(other.insertOrder);
-    std::swap(counter, other.counter);
 }
 #endif
 
@@ -217,10 +209,9 @@ Value OrderedMap<Key, Value>::take(const Key &key)
     if (it == data.end()) {
         return Value();
     }
-    QPair<Value, int> pair = it.value();
+    OMHashValue pair = it.value();
+    insertOrder.erase(pair.second);
     data.erase(it);
-    insertOrder.remove(pair.second);
-
     return pair.first;
 }
 
@@ -237,8 +228,7 @@ Value OrderedMap<Key, Value>::value(const Key &key, const Value &defaultValue) c
     if (it == data.end()) {
         return defaultValue;
     }
-    QPair<Value, int> pair = it.value();
-
+    OMHashValue pair = it.value();
     return pair.first;
 }
 
@@ -246,8 +236,8 @@ template <typename Key, typename Value>
 QList<Value> OrderedMap<Key, Value>::values() const
 {
     QList<Value> values;
-    foreach (const Key &key, insertOrder.values()) {
-        QPair<Value, int> v = data.value(key);
+    foreach (const Key &key, insertOrder.toStdList()) {
+        OMHashValue v = data.value(key);
         values.append(v.first);
     }
     return values;
@@ -261,9 +251,7 @@ OrderedMap<Key, Value> & OrderedMap<Key, Value>::operator=(OrderedMap<Key, Value
 #else
     data = other.data;
     insertOrder = other.insertOrder;
-    counter = other.counter;
 #endif
-
     return *this;
 }
 
@@ -271,13 +259,13 @@ template <typename Key, typename Value>
 bool OrderedMap<Key, Value>::operator==(const OrderedMap<Key, Value> &other) const
 {
     // 2 Ordered maps are equal if they have the same contents in the same order
-    return ((data == other.data) && (insertOrder.values() == other.insertOrder.values()));
+    return ((data == other.data) && (insertOrder == other.insertOrder));
 }
 
 template <typename Key, typename Value>
 bool OrderedMap<Key, Value>::operator!=(const OrderedMap<Key, Value> &other) const
 {
-    return ((data != other.data) || (insertOrder.values() != other.insertOrder.values()));
+    return ((data != other.data) || (insertOrder != other.insertOrder));
 }
 
 template <typename Key, typename Value>
@@ -288,9 +276,7 @@ Value& OrderedMap<Key, Value>::operator[](const Key &key)
         insert(key, Value());
         it = data.find(key);
     }
-
-    QPair<Value, int> &pair = it.value();
-
+    OMHashValue &pair = it.value();
     return pair.first;
 }
 

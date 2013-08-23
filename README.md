@@ -25,7 +25,7 @@ Requirements
 
 Performance
 ===========
-<code>OrderedMap</code> uses a hashtable (<code>QHash</code>) for storing the data and a map (<code>QMap</code>) for storing the order of the keys.
+<code>OrderedMap</code> uses a hashtable (<code>QHash</code>) for storing the data and a map (<code>QLinkedList</code>) for storing the order of the keys.
 
 <table border=2 cellspacing="2" cellpadding="5%">
 <tr>
@@ -46,14 +46,10 @@ Performance
     <td align="center">OrderedMap</td>
     <td align="center">Amortized <b>O(1)<b></td>
     <td align="center"><b>O(n)</b></td>
-    <td align="center"><b>O(log n)</b></td>
+    <td align="center">Amortized <b>O(1)</b></td>
     <td align="center"><b>O(n)</b></td>
-    <td align="center"><b>O(log n)</b></td>
+    <td align="center">Amortized <b>O(1)</b></td>
     <td align="center"><b>O(n)</b></td>
 </tr>
 </table>
-
-Limitation
-==========
-<code>OrderedMap</code> uses a free running counter to keep track of the insertion order. This counter is a <code>qunit32</code> so this limits the insert/remove operations on the map. This will be fixed soon in a later revision.
 
