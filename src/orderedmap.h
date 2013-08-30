@@ -27,11 +27,23 @@ template <typename Ptr> inline bool oMHashEqualToKey(const Ptr *key1, const Ptr 
 template <typename Key, typename Value>
 class OrderedMap
 {
+    class OMHash;
 
-    typedef typename QLinkedList<Key>::iterator qllIterator;
-    typedef QPair<Value, qllIterator> OMHashValue;
+    typedef typename QLinkedList<Key>::iterator QllIterator;
+    typedef typename QLinkedList<Key>::const_iterator QllConstIterator;
+    typedef QPair<Value, QllIterator> OMHashValue;
+
+    typedef typename OMHash::iterator OMHashIterator;
+    typedef typename OMHash::const_iterator OMHashConstIterator;
 
 public:
+
+    class iterator;
+    class const_iterator;
+
+    typedef typename OrderedMap<Key, Value>::iterator Iterator;
+    typedef typename OrderedMap<Key, Value>::const_iterator ConstIterator;
+
     explicit OrderedMap();
 
     void clear();
@@ -42,7 +54,7 @@ public:
 
     bool empty() const;
 
-    void insert(const Key &key, const Value &value);
+    iterator insert(const Key &key, const Value &value);
 
     bool isEmpty() const;
 
@@ -73,6 +85,205 @@ public:
     Value& operator[](const Key &key);
 
     const Value operator[](const Key &key) const;
+
+    iterator begin();
+
+    const_iterator begin() const;
+
+    iterator end();
+
+    const_iterator end() const;
+
+    iterator erase(iterator pos);
+
+    iterator find(const Key& key);
+
+    const_iterator find(const Key& key) const;
+
+    class iterator
+    {
+    public:
+
+        QllIterator qllIter;
+        OMHash *data;
+
+        iterator() : data(NULL) {}
+
+        iterator(const QllIterator &qllIter, OMHash *data) :
+            qllIter(qllIter), data(data) {}
+
+        const Key & key() const
+        {
+            return *qllIter;
+        }
+
+        Value & value() const
+        {
+            OMHashIterator hit = data->find(*qllIter);
+            OMHashValue &pair = hit.value();
+            return pair.first;
+        }
+
+        Value & operator*() const
+        {
+            return value();
+        }
+
+        iterator operator+(int i) const
+        {
+            QllIterator q = qllIter;
+            q += i;
+
+            return iterator(q, data);
+        }
+
+        iterator operator-(int i) const
+        {
+            return operator +(- i);
+        }
+
+        iterator& operator+=(int i)
+        {
+            qllIter += i;
+            return *this;
+        }
+
+        iterator& operator-=(int i)
+        {
+            qllIter -= i;
+            return *this;
+        }
+
+        iterator& operator++()
+        {
+            ++qllIter;
+            return *this;
+        }
+
+        iterator operator++(int)
+        {
+            iterator it = *this;
+            qllIter++;
+            return it;
+        }
+
+        iterator operator--()
+        {
+            --qllIter;
+            return *this;
+        }
+
+        iterator operator--(int)
+        {
+            iterator it = *this;
+            qllIter--;
+            return it;
+        }
+
+        bool operator ==(const iterator &other) const
+        {
+            return (qllIter == other.qllIter);
+        }
+
+        bool operator !=(const iterator &other) const
+        {
+            return (qllIter != other.qllIter);
+        }
+    };
+
+    class const_iterator
+    {
+    public:
+
+        QllConstIterator qllConstIter;
+        const OMHash *data;
+
+        const_iterator() : data(NULL) {}
+
+        const_iterator(const iterator &i) :
+            qllConstIter(i.qllIter), data(i.data) {}
+
+        const_iterator(const QllConstIterator &qllConstIter, const OMHash* data) :
+            qllConstIter(qllConstIter), data(data) {}
+
+        const Key & key() const
+        {
+            return *qllConstIter;
+        }
+
+        const Value & value() const
+        {
+            OMHashConstIterator hit = data->find(*qllConstIter);
+            const OMHashValue &pair = hit.value();
+            return pair.first;
+        }
+
+        const Value & operator*() const
+        {
+            return value();
+        }
+
+        const_iterator operator+(int i) const
+        {
+            QllConstIterator q = qllConstIter;
+            q += i;
+
+            return const_iterator(q, data);
+        }
+
+        const_iterator operator-(int i) const
+        {
+            return operator +(- i);
+        }
+
+        const_iterator& operator+=(int i)
+        {
+            qllConstIter += i;
+            return *this;
+        }
+
+        const_iterator& operator-=(int i)
+        {
+            qllConstIter -= i;
+            return *this;
+        }
+
+        const_iterator& operator++()
+        {
+            ++qllConstIter;
+            return *this;
+        }
+
+        const_iterator operator++(int)
+        {
+            const_iterator it = *this;
+            qllConstIter++;
+            return it;
+        }
+
+        const_iterator operator--()
+        {
+            --qllConstIter;
+            return *this;
+        }
+
+        const_iterator operator--(int)
+        {
+            const_iterator it = *this;
+            qllConstIter--;
+            return it;
+        }
+
+        bool operator ==(const const_iterator &other) const
+        {
+            return (qllConstIter == other.qllConstIter);
+        }
+
+        bool operator !=(const const_iterator &other) const
+        {
+            return (qllConstIter != other.qllConstIter);
+        }
+    };
 
 private:
 
@@ -141,24 +352,26 @@ bool OrderedMap<Key, Value>::empty() const
 }
 
 template <typename Key, typename Value>
-void OrderedMap<Key, Value>::insert(const Key &key, const Value &value)
+typename OrderedMap<Key, Value>::iterator OrderedMap<Key, Value>::insert(const Key &key, const Value &value)
 {
-    typename OMHash::iterator it = data.find(key);
+    OMHashIterator it = data.find(key);
+
     if (it == data.end()) {
         // New key
-        qllIterator ioIter = insertOrder.insert(insertOrder.end(), key);
+        QllIterator ioIter = insertOrder.insert(insertOrder.end(), key);
         OMHashValue pair(value, ioIter);
         data.insert(key, pair);
-        return;
+        return iterator(ioIter, &data);
     }
 
     OMHashValue pair = it.value();
     // remove old reference
     insertOrder.erase(pair.second);
     // Add new reference
-    qllIterator ioIter = insertOrder.insert(insertOrder.end(), key);
+    QllIterator ioIter = insertOrder.insert(insertOrder.end(), key);
     pair.first = value;
     pair.second = ioIter;
+    return iterator(ioIter, &data);
 }
 
 template <typename Key, typename Value>
@@ -176,7 +389,7 @@ std::list<Key> OrderedMap<Key, Value>::keys() const
 template<typename Key, typename Value>
 int OrderedMap<Key, Value>::remove(const Key &key)
 {
-    typename OMHash::iterator it = data.find(key);
+    OMHashIterator it = data.find(key);
     if (it == data.end()) {
         return 0;
     }
@@ -205,7 +418,7 @@ void OrderedMap<Key, Value>::swap(OrderedMap<Key, Value> &other)
 template<typename Key, typename Value>
 Value OrderedMap<Key, Value>::take(const Key &key)
 {
-    typename OMHash::iterator it = data.find(key);
+    OMHashIterator it = data.find(key);
     if (it == data.end()) {
         return Value();
     }
@@ -224,7 +437,7 @@ Value OrderedMap<Key, Value>::value(const Key &key) const
 template <typename Key, typename Value>
 Value OrderedMap<Key, Value>::value(const Key &key, const Value &defaultValue) const
 {
-    typename OMHash::const_iterator it = data.constFind(key);
+    OMHashConstIterator it = data.constFind(key);
     if (it == data.end()) {
         return defaultValue;
     }
@@ -271,7 +484,7 @@ bool OrderedMap<Key, Value>::operator!=(const OrderedMap<Key, Value> &other) con
 template <typename Key, typename Value>
 Value& OrderedMap<Key, Value>::operator[](const Key &key)
 {
-    typename OMHash::iterator it = data.find(key);
+    OMHashIterator it = data.find(key);
     if (it == data.end()) {
         insert(key, Value());
         it = data.find(key);
@@ -284,6 +497,66 @@ template <typename Key, typename Value>
 const Value OrderedMap<Key, Value>::operator[](const Key &key) const
 {
     return value(key);
+}
+
+template <typename Key, typename Value>
+typename OrderedMap<Key, Value>::iterator OrderedMap<Key, Value>::begin()
+{
+    return iterator(insertOrder.begin(), &data);
+}
+
+template <typename Key, typename Value>
+typename OrderedMap<Key, Value>::const_iterator OrderedMap<Key, Value>::begin() const
+{
+    return const_iterator(insertOrder.begin(), &data);
+}
+
+
+template <typename Key, typename Value>
+typename OrderedMap<Key, Value>::iterator OrderedMap<Key, Value>::end()
+{
+    return iterator(insertOrder.end(), &data);
+}
+
+template <typename Key, typename Value>
+typename OrderedMap<Key, Value>::const_iterator OrderedMap<Key, Value>::end() const
+{
+    return const_iterator(insertOrder.end(), &data);
+}
+
+template <typename Key, typename Value>
+typename OrderedMap<Key, Value>::iterator OrderedMap<Key, Value>::erase(iterator pos)
+{
+    OMHashIterator hit = data.find(*(pos.qllIter));
+    if (hit == data.end()) {
+        return pos;
+    }
+    data.erase(hit);
+    QllIterator ioIter = insertOrder.erase(pos.qllIter);
+
+    return iterator(ioIter, &data);
+}
+
+template <typename Key, typename Value>
+typename OrderedMap<Key, Value>::iterator OrderedMap<Key, Value>::find(const Key& key)
+{
+    OMHashIterator hit = data.find(key);
+    if (hit == data.end()) {
+        return end();
+    }
+
+    return iterator(hit.value().second, &data);
+}
+
+template <typename Key, typename Value>
+typename OrderedMap<Key, Value>::const_iterator OrderedMap<Key, Value>::find(const Key& key) const
+{
+    OMHashConstIterator hit = data.find(key);
+    if (hit == data.end()) {
+        return end();
+    }
+
+    return const_iterator(hit.value().second, &data);
 }
 
 #endif // ORDEREDMAP_H

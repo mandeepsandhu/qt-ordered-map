@@ -1,5 +1,6 @@
 #include <QtTest/QtTest>
 #include <QString>
+#include <QDebug>
 
 #include "orderedmap.h"
 
@@ -24,12 +25,21 @@ private slots:
     void opEqualityTest();
     void opInequalityTest();
     void opSqrBracesTest();
+
+    // Iterator tests
+    void insertTest();
+    void beginTest();
+    void endTest();
+    void findTest();
+    void eraseTest();
+    void iterationOrderTest();
+    void foreachTest();
+    void iteratorOperatorsTest();
 };
 
 void TestOrderedMap::containsTest()
 {
     OrderedMap<int, QString> om;
-    // Add 3 elements
     om.insert(0,QString("0"));
     om.insert(1,QString("1"));
     om.insert(2,QString("2"));
@@ -41,21 +51,21 @@ void TestOrderedMap::containsTest()
 void TestOrderedMap::clearSizeCountTest()
 {
     OrderedMap<int, int> om;
-    // Add 3 elements
     om.insert(0,0);
     om.insert(1,1);
     om.insert(2,2);
+
     QVERIFY(om.size() == 3);
     QVERIFY(om.count() == 3);
 
-    // Remove 2 elements
     om.remove(2);
     om.remove(0);
+
     QVERIFY(om.size() == 1);
     QVERIFY(om.count() == 1);
 
-    // Remove All elements
     om.clear();
+
     QVERIFY(om.size() == 0);
     QVERIFY(om.count() == 0);
 }
@@ -63,6 +73,7 @@ void TestOrderedMap::clearSizeCountTest()
 void TestOrderedMap::emptyAndIsEmptyTest()
 {
     OrderedMap<int, int> om;
+
     QVERIFY(om.empty());
     QVERIFY(om.isEmpty());
 
@@ -87,12 +98,11 @@ void TestOrderedMap::removeTest()
 
     int result = om.remove(QString("2"));
 
-    // Only 1 item should be removed
     QVERIFY(result == 1);
     QVERIFY(!om.contains(QString("2")));
 
     result = om.remove(QString("4"));
-    // No item should be removed
+
     QVERIFY(result == 0);
 }
 
@@ -123,6 +133,7 @@ void TestOrderedMap::orderTest()
 
     int ans2[] = {2, 1};
     i = 0;
+
     foreach (int k, om2.keys()) {
         QVERIFY(k == ans2[i++]);
     }
@@ -143,7 +154,6 @@ void TestOrderedMap::swapTest()
 
     QVERIFY(om1.size() == 3);
     QVERIFY(om2.size() == 2);
-
     QVERIFY(om1.value(3) == 3);
     QVERIFY(om1.value(4) == 4);
     QVERIFY(om1.value(5) == 5);
@@ -160,6 +170,7 @@ void TestOrderedMap::takeTest()
     om.insert(3,3);
 
     int result = om.take(1);
+
     QVERIFY(result == 1);
     QVERIFY(om.size() == 2);
 }
@@ -167,7 +178,6 @@ void TestOrderedMap::takeTest()
 void TestOrderedMap::valueTest()
 {
     OrderedMap<int, int> om;
-    // Add 3 elements
     om.insert(0,0);
     om.insert(1,1);
     om.insert(2,2);
@@ -193,6 +203,7 @@ void TestOrderedMap::valuesTest()
 
     int ans[] = {3, 1, 5, 6};
     int i = 0;
+
     foreach (int v, om.values()) {
         QVERIFY(v == ans[i++]);
     }
@@ -206,6 +217,7 @@ void TestOrderedMap::opAssignTest()
     om1.insert(1,1);
 
     om2 = om1;
+
     QVERIFY(om2.size() == 3);
     QVERIFY(om1.value(3) == 3);
     QVERIFY(om1.value(2) == 2);
@@ -251,7 +263,6 @@ void TestOrderedMap::opInequalityTest()
 void TestOrderedMap::opSqrBracesTest()
 {
     OrderedMap<QString, QString> om;
-
     om.insert(QString("1"),QString("1"));
     om.insert(QString("2"),QString("2"));
     om.insert(QString("3"),QString("3"));
@@ -269,6 +280,265 @@ void TestOrderedMap::opSqrBracesTest()
 
     QVERIFY(invalidResult.isEmpty());
     QVERIFY(om.size() == 4);
+}
+
+void TestOrderedMap::insertTest()
+{
+    OrderedMap<int, QString> om;
+    OrderedMap<int, QString>::Iterator it = om.insert(1, QString::number(1));
+
+    QVERIFY(it.key() == 1);
+    QVERIFY(it.value() == QString::number(1));
+
+    OrderedMap<int, QString>::Iterator it2 = om.insert(2, QString::number(2));
+
+    QVERIFY(it2.key() == 2);
+    QVERIFY(it2.value() == QString::number(2));
+}
+
+void TestOrderedMap::beginTest()
+{
+    OrderedMap<QString, QString> om;
+    om.insert(QString("1"),QString("1"));
+    om.insert(QString("2"),QString("2"));
+    om.insert(QString("3"),QString("3"));
+
+    OrderedMap<QString, QString>::Iterator it  = om.begin();
+
+    QVERIFY(it.key() == QString("1"));
+    QVERIFY(it.value() == QString("1"));
+}
+
+void TestOrderedMap::endTest()
+{
+    OrderedMap<QString, QString> om;
+    om.insert(QString("1"),QString("1"));
+    om.insert(QString("2"),QString("2"));
+    om.insert(QString("3"),QString("3"));
+
+    OrderedMap<QString, QString>::Iterator it = om.end();
+    --it;
+
+    QVERIFY(it.key() == QString("3"));
+    QVERIFY(it.value() == QString("3"));
+}
+
+void TestOrderedMap::findTest()
+{
+    OrderedMap<QString, QString> om;
+    om.insert(QString("1"),QString("one"));
+    om.insert(QString("2"),QString("two"));
+    om.insert(QString("3"),QString("three"));
+
+    OrderedMap<QString, QString>::Iterator it = om.find(QString("2"));
+
+    QVERIFY(it.key() == QString("2"));
+    QVERIFY(it.value() == QString("two"));
+
+    it = om.find(QString("4"));
+
+    QVERIFY(it == om.end());
+}
+
+void TestOrderedMap::eraseTest()
+{
+    OrderedMap<int, int> om;
+    om.insert(3,3);
+    om.insert(2,2);
+    om.insert(1,1);
+
+    OrderedMap<int, int>::Iterator it = om.erase(om.find(2));
+
+    QVERIFY(!om.contains(2));
+    QVERIFY(it.key() == 1);
+    QVERIFY(it.value() == 1);
+
+    it = om.erase(om.find(1));
+
+    QVERIFY(!om.contains(1));
+    QVERIFY(it == om.end());
+}
+
+void TestOrderedMap::iterationOrderTest()
+{
+    OrderedMap<int, int> om;
+    om.insert(3,3);
+    om.insert(2,2);
+    om.insert(1,1);
+
+    int ans[] = {3, 2, 1};
+    OrderedMap<int, int>::Iterator it = om.begin();
+
+    int counter = 0;
+    while(it != om.end()) {
+        QVERIFY(it.key() == ans[counter]);
+        QVERIFY(it.value() == ans[counter]);
+        QVERIFY(*it == ans[counter]);
+
+        counter++;
+        it++;
+    }
+
+    while(it != om.begin()) {
+        counter--;
+        it--;
+        QVERIFY(it.key() == ans[counter]);
+        QVERIFY(it.value() == ans[counter]);
+        QVERIFY(*it == ans[counter]);
+    }
+}
+
+void TestOrderedMap::foreachTest()
+{
+    OrderedMap<int, int> om;
+    om.insert(3,3);
+    om.insert(2,2);
+    om.insert(1,1);
+
+    int ans[] = {3, 2, 1};
+
+    int counter = 0;
+    foreach (int value, om) {
+        QVERIFY(value == ans[counter]);
+        counter++;
+    }
+}
+
+void TestOrderedMap::iteratorOperatorsTest()
+{
+    OrderedMap<int, QString> om;
+    om.insert(1,QString("1"));
+    om.insert(2,QString("2"));
+    om.insert(3,QString("3"));
+    om.insert(4,QString("4"));
+    om.insert(5,QString("5"));
+    om.insert(6,QString("6"));
+
+    OrderedMap<int, QString>::Iterator it = om.begin();
+
+    // Iterator tests
+    QVERIFY(it.key() == 1);
+    QVERIFY(it.value() == QString("1"));
+    QVERIFY(*it == QString("1"));
+
+    OrderedMap<int, QString>::Iterator it2 = it + 2;
+
+    QVERIFY(it2.key() == 3);
+    QVERIFY(it2.value() == QString("3"));
+
+    OrderedMap<int, QString>::Iterator it3 = it2 - 1;
+
+    QVERIFY(it3.key() == 2);
+    QVERIFY(it3.value() == QString("2"));
+
+    it += 2;
+
+    QVERIFY(it.key() == 3);
+    QVERIFY(it.value() == QString("3"));
+
+    it -= 1;
+
+    QVERIFY(it.key() == 2);
+    QVERIFY(it.value() == QString("2"));
+
+    OrderedMap<int, QString>::Iterator it4 = it++;
+
+    QVERIFY(it4.key() == 2);
+    QVERIFY(it4.value() == QString("2"));
+    QVERIFY(it.key() == 3);
+    QVERIFY(it.value() == QString("3"));
+
+    OrderedMap<int, QString>::Iterator it5 = ++it;
+
+    QVERIFY(it5.key() == 4);
+    QVERIFY(it5.value() == QString("4"));
+    QVERIFY(it.key() == 4);
+    QVERIFY(it.value() == QString("4"));
+
+    OrderedMap<int, QString>::Iterator it6 = it--;
+
+    QVERIFY(it6.key() == 4);
+    QVERIFY(it6.value() == QString("4"));
+    QVERIFY(it.key() == 3);
+    QVERIFY(it.value() == QString("3"));
+
+    OrderedMap<int, QString>::Iterator it7 = --it;
+
+    QVERIFY(it7.key() == 2);
+    QVERIFY(it7.value() == QString("2"));
+    QVERIFY(it.key() == 2);
+    QVERIFY(it.value() == QString("2"));
+
+    QVERIFY(it != it2);
+    QVERIFY(it == it3);
+
+    QString &ref = it.value();
+    ref.append("two");
+    QVERIFY(om.value(2) == QString("2two"));
+    // Reset value back to original
+    ref = "2";
+
+    // Const iterator
+    OrderedMap<int, QString>::ConstIterator cit = om.begin();
+    QVERIFY(cit.key() == 1);
+    QVERIFY(cit.value() == QString("1"));
+    QVERIFY(*cit == QString("1"));
+
+    OrderedMap<int, QString>::ConstIterator cit2 = cit + 2;
+
+    QVERIFY(cit2.key() == 3);
+    QVERIFY(cit2.value() == QString("3"));
+
+    OrderedMap<int, QString>::ConstIterator cit3 = cit2 - 1;
+
+
+    QVERIFY(cit3.key() == 2);
+    QVERIFY(cit3.value() == QString("2"));
+
+    cit += 2;
+
+    QVERIFY(cit.key() == 3);
+    QVERIFY(cit.value() == QString("3"));
+
+    cit -= 1;
+
+    QVERIFY(cit.key() == 2);
+    QVERIFY(cit.value() == QString("2"));
+
+    OrderedMap<int, QString>::ConstIterator cit4 = cit++;
+
+    QVERIFY(cit4.key() == 2);
+    QVERIFY(cit4.value() == QString("2"));
+    QVERIFY(cit.key() == 3);
+    QVERIFY(cit.value() == QString("3"));
+
+    OrderedMap<int, QString>::ConstIterator cit5 = ++cit;
+
+    QVERIFY(cit5.key() == 4);
+    QVERIFY(cit5.value() == QString("4"));
+    QVERIFY(cit.key() == 4);
+    QVERIFY(cit.value() == QString("4"));
+
+    OrderedMap<int, QString>::ConstIterator cit6 = cit--;
+
+    QVERIFY(cit6.key() == 4);
+    QVERIFY(cit6.value() == QString("4"));
+    QVERIFY(cit.key() == 3);
+    QVERIFY(cit.value() == QString("3"));
+
+    OrderedMap<int, QString>::ConstIterator cit7 = --cit;
+
+    QVERIFY(cit7.key() == 2);
+    QVERIFY(cit7.value() == QString("2"));
+    QVERIFY(cit.key() == 2);
+    QVERIFY(cit.value() == QString("2"));
+
+    QVERIFY(cit != cit2);
+    QVERIFY(cit == cit3);
+
+    OrderedMap<int, QString>::ConstIterator cit8(it7);
+    QVERIFY(cit8.key() == it7.key());
+    QVERIFY(cit8.value() == it7.value());
 }
 
 QTEST_MAIN(TestOrderedMap)
