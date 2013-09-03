@@ -15,7 +15,8 @@ int main(int argc, char **argv)
     if (argc > 1) {
         itemCount = QString(argv[1]).toInt(&ok);
         if (!ok) {
-            qWarning() << "Enter a valid number!";
+            qWarning() << "\nError! Enter a valid number.";
+            qDebug() << "\nUsage:\n\t" << *argv << "<number of items for testing>\n";
             return 1;
         }
     } else {
