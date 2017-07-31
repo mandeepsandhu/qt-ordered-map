@@ -1,3 +1,4 @@
+QT -= gui
 SOURCES = \
     testorderedmap.cpp
 

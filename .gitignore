@@ -19,3 +19,11 @@ moc_*.cpp
 qrc_*.cpp
 Makefile
 *build-*
+
+# Tests & examples
+examples/lrucache/lrucache
+tests/functional/functional
+tests/performance/performance
+
+# vim
+*.swp
