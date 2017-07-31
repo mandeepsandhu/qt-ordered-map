@@ -56,7 +56,7 @@ int main(int argc, char **argv)
     for (int i=0; i<itemCount; i++) {
         om.insert(i, QString::number(i));
     }
-    qDebug() << "Ordered ma :" << timer.elapsed() << "msecs";
+    qDebug() << "Ordered map :" << timer.elapsed() << "msecs";
     qDebug() << "\n";
 
     qDebug() << "Timing iteration over" << itemCount << "items...\n";

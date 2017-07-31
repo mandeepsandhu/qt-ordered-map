@@ -64,10 +64,6 @@ public:
 
     int size() const;
 
-#if QT_VERSION >= 0x040800
-    void swap(OrderedMap<Key, Value> &other);
-#endif
-
     Value take(const Key &key);
 
     Value value(const Key &key) const;
@@ -76,7 +72,7 @@ public:
 
     QList<Value> values() const;
 
-    OrderedMap<Key, Value> & operator=(OrderedMap<Key, Value> other);
+    OrderedMap<Key, Value> & operator=(const OrderedMap<Key, Value>& other);
 
     bool operator==(const OrderedMap<Key, Value> &other) const;
 
@@ -100,13 +96,16 @@ public:
 
     const_iterator find(const Key& key) const;
 
+    class const_iterator;
+
     class iterator
     {
-    public:
-
         QllIterator qllIter;
         OMHash *data;
+        friend class const_iterator;
+        friend class OrderedMap;
 
+    public:
         iterator() : data(NULL) {}
 
         iterator(const QllIterator &qllIter, OMHash *data) :
@@ -193,11 +192,11 @@ public:
 
     class const_iterator
     {
-    public:
 
         QllConstIterator qllConstIter;
         const OMHash *data;
 
+    public:
         const_iterator() : data(NULL) {}
 
         const_iterator(const iterator &i) :
@@ -318,6 +317,7 @@ private:
     };
 
 private:
+    void copy(const OrderedMap<Key, Value> &other);
 
     OMHash data;
     QLinkedList<Key> insertOrder;
@@ -405,15 +405,29 @@ int OrderedMap<Key, Value>::size() const
     return data.size();
 }
 
-#if QT_VERSION >= 0x040800
 template<typename Key, typename Value>
-void OrderedMap<Key, Value>::swap(OrderedMap<Key, Value> &other)
+void OrderedMap<Key, Value>::copy(const OrderedMap<Key, Value> &other)
 {
-    // Swap individual components
-    data.swap(other.data);
-    insertOrder.swap(other.insertOrder);
+    /* Since I'm storing iterators of QLinkedList, I simply cannot make
+     * a trivial copy of the linked list. This is a limitation due to implicit
+     * sharing used in Qt containers, due to which iterator active on one
+     * QLL can change the data of another QLL even after creating a copy.
+     *
+     * Because of this, the old iterators have to be invalidated and new ones
+     * have to be generated.
+     */
+    insertOrder.clear();
+    // Copy hash
+    data = other.data;
+
+    QllConstIterator cit = other.insertOrder.begin();
+    for (; cit != other.insertOrder.end(); ++cit) {
+        Key key = *cit;
+        QllIterator ioIter = insertOrder.insert(insertOrder.end(), key);
+        OMHashIterator it = data.find(key);
+        (*it).second = ioIter;
+    }
 }
-#endif
 
 template<typename Key, typename Value>
 Value OrderedMap<Key, Value>::take(const Key &key)
@@ -457,14 +471,9 @@ QList<Value> OrderedMap<Key, Value>::values() const
 }
 
 template <typename Key, typename Value>
-OrderedMap<Key, Value> & OrderedMap<Key, Value>::operator=(OrderedMap<Key, Value> other)
+OrderedMap<Key, Value> & OrderedMap<Key, Value>::operator=(const OrderedMap<Key, Value>& other)
 {
-#if QT_VERSION >= 0x040800
-    swap(other);
-#else
-    data = other.data;
-    insertOrder = other.insertOrder;
-#endif
+    copy(other);
     return *this;
 }
 
