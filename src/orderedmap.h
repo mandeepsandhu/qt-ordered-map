@@ -46,6 +46,8 @@ public:
 
     explicit OrderedMap();
 
+    OrderedMap(const OrderedMap<Key, Value>& other);
+
     void clear();
 
     bool contains(const Key &key) const;
@@ -325,6 +327,12 @@ private:
 
 template <typename Key, typename Value>
 OrderedMap<Key, Value>::OrderedMap() {}
+
+template <typename Key, typename Value>
+OrderedMap<Key, Value>::OrderedMap(const OrderedMap<Key, Value>& other)
+{
+    copy(other);
+}
 
 template <typename Key, typename Value>
 void OrderedMap<Key, Value>::clear()
