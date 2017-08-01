@@ -18,6 +18,7 @@ private slots:
     void takeTest();
     void valueTest();
     void valuesTest();
+    void copyConstructorTest();
     void opAssignTest();
     void opEqualityTest();
     void opInequalityTest();
@@ -180,6 +181,77 @@ void TestOrderedMap::valuesTest()
 
     foreach (int v, om.values()) {
         QVERIFY(v == ans[i++]);
+    }
+}
+
+void TestOrderedMap::copyConstructorTest()
+{
+    OrderedMap<int, int> om1;
+    om1.insert(3,3);
+    om1.insert(2,2);
+    om1.insert(1,1);
+
+    OrderedMap<int, int> om2(om1);
+
+    QVERIFY(om1.size() == 3);
+    QVERIFY(om1.keys().size() == 3);
+    QVERIFY(om1.value(3) == 3);
+    QVERIFY(om1.value(2) == 2);
+    QVERIFY(om1.value(1) == 1);
+
+    QVERIFY(om2.size() == 3);
+    QVERIFY(om2.keys().size() == 3);
+    QVERIFY(om2.value(3) == 3);
+    QVERIFY(om2.value(2) == 2);
+    QVERIFY(om2.value(1) == 1);
+
+    om2.remove(2);
+    QVERIFY(om2.size() == 2);
+    QVERIFY(om2.keys().size() == 2);
+    QVERIFY(om2.value(3) == 3);
+    QVERIFY(om2.value(2) == 0); // default constructed value
+    QVERIFY(om2.value(1) == 1);
+    QVERIFY(om1.size() == 3);
+    QVERIFY(om1.keys().size() == 3);
+    QVERIFY(om1.value(3) == 3);
+    QVERIFY(om1.value(2) == 2);
+    QVERIFY(om1.value(1) == 1);
+
+    om2.remove(1);
+    QVERIFY(om2.size() == 1);
+    QVERIFY(om2.keys().size() == 1);
+    QVERIFY(om2.value(3) == 3);
+    QVERIFY(om2.value(2) == 0); // default constructed value
+    QVERIFY(om2.value(1) == 0); // default constructed value
+    QVERIFY(om1.size() == 3);
+    QVERIFY(om1.keys().size() == 3);
+    QVERIFY(om1.value(3) == 3);
+    QVERIFY(om1.value(2) == 2);
+    QVERIFY(om1.value(1) == 1);
+
+    om1.remove(3);
+    QVERIFY(om1.size() == 2);
+    QVERIFY(om1.keys().size() == 2);
+    QVERIFY(om1.value(3) == 0);
+    QVERIFY(om1.value(2) == 2); // default constructed value
+    QVERIFY(om1.value(1) == 1); // default constructed value
+    QVERIFY(om2.size() == 1);
+    QVERIFY(om2.value(3) == 3);
+    QVERIFY(om2.keys().size() == 1);
+
+    om1.insert(4,4);
+    om2.insert(5,5);
+
+    int om1_ans[] = { 2, 1, 4};
+    int om2_ans[] = { 3, 5};
+
+    int i = 0;
+    foreach (int v, om1.values()) {
+        QVERIFY(v == om1_ans[i++]);
+    }
+    i = 0;
+    foreach (int v, om2.values()) {
+        QVERIFY(v == om2_ans[i++]);
     }
 }
 

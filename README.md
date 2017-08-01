@@ -23,6 +23,10 @@ Requirements
 ============
 - The key type for the <code>OrderedMap</code> **must** provide <code>operator==()</code> and a global hash function called <code>qHash()</code>.
 
+Limitations
+===========
+- OrderedMap currently does NOT support implicit sharing like other Qt containers. A deep-copy will be made whenever copying the container with either copy constructor or assignment operator.
+
 Performance
 ===========
 <code>OrderedMap</code> uses a hashtable (<code>QHash</code>) for storing the data and a map (<code>QLinkedList</code>) for storing the order of the keys.
