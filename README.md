@@ -1,5 +1,8 @@
-qt-ordered-map
-==============
+# Qt Ordered Map
+
+[![Github Issues](https://img.shields.io/github/issues/mandeepsandhu/qt-ordered-map.svg)](https://github.com/mandeepsandhu/qt-ordered-map/issues)
+[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/mandeepsandhu/qt-ordered-map.svg)](http://isitmaintained.com/project/mandeepsandhu/qt-ordered-map
+"Average time to resolve an issue")
 
 A **Qt** based implementation of an *ordered map*.
 
