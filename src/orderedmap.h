@@ -60,7 +60,7 @@ public:
 
     bool isEmpty() const;
 
-    std::list<Key> keys() const;
+    QList<Key> keys() const;
 
     int remove(const Key &key);
 
@@ -389,9 +389,9 @@ bool OrderedMap<Key, Value>::isEmpty() const
 }
 
 template<typename Key, typename Value>
-std::list<Key> OrderedMap<Key, Value>::keys() const
+QList<Key> OrderedMap<Key, Value>::keys() const
 {
-    return insertOrder.toStdList();
+    return QList<Key>::fromStdList(insertOrder.toStdList());
 }
 
 template<typename Key, typename Value>
