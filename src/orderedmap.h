@@ -6,6 +6,10 @@
 #include <QList>
 #include <QPair>
 
+#ifdef Q_COMPILER_INITIALIZER_LISTS
+#include <initializer_list>
+#endif
+
 template <typename Key> inline bool oMHashEqualToKey(const Key &key1, const Key &key2)
 {
     // Key type must provide '==' operator
@@ -47,6 +51,10 @@ public:
     explicit OrderedMap();
 
     OrderedMap(const OrderedMap<Key, Value>& other);
+
+#ifdef Q_COMPILER_INITIALIZER_LISTS
+    OrderedMap(std::initializer_list<std::pair<Key,Value> > list);
+#endif
 
     void clear();
 
@@ -333,6 +341,15 @@ OrderedMap<Key, Value>::OrderedMap(const OrderedMap<Key, Value>& other)
 {
     copy(other);
 }
+
+#ifdef Q_COMPILER_INITIALIZER_LISTS
+template<typename Key, typename Value>
+OrderedMap<Key, Value>::OrderedMap(std::initializer_list<std::pair<Key, Value> > list)
+{
+    for (typename std::initializer_list<std::pair<Key,Value> >::const_iterator it = list.begin(); it != list.end(); ++it)
+        insert(it->first, it->second);
+}
+#endif
 
 template <typename Key, typename Value>
 void OrderedMap<Key, Value>::clear()
