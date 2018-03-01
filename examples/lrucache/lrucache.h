@@ -57,7 +57,7 @@ public:
         entries.remove(key);
     }
 
-    std::list<Key> keys() const {
+    QList<Key> keys() const {
         return entries.keys();
     }
 
