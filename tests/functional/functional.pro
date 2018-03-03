@@ -4,6 +4,7 @@ SOURCES = \
 
 greaterThan(QT_MAJOR_VERSION, 4) {
 QT += testlib
+CONFIG += c++11
 } else {
 CONFIG  += qtestlib
 }

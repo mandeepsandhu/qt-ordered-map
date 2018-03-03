@@ -20,6 +20,10 @@ private slots:
     void valuesTest();
     void copyConstructorTest();
     void opAssignTest();
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
+    void moveConstructorTest();
+    void opMoveAssignTest();
+#endif
     void opEqualityTest();
     void opInequalityTest();
     void opSqrBracesTest();
@@ -254,6 +258,54 @@ void TestOrderedMap::copyConstructorTest()
         QVERIFY(v == om2_ans[i++]);
     }
 }
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
+OrderedMap<int, int> genRValue()
+{
+    OrderedMap<int, int> om1;
+    om1.insert(3,3);
+    om1.insert(2,2);
+    om1.insert(1,1);
+    return om1;
+}
+
+void TestOrderedMap::moveConstructorTest()
+{
+    OrderedMap<int, int> om2(genRValue());
+
+    QVERIFY(om2.size() == 3);
+    QVERIFY(om2.keys().size() == 3);
+    QVERIFY(om2.value(3) == 3);
+    QVERIFY(om2.value(2) == 2);
+    QVERIFY(om2.value(1) == 1);
+
+    om2.remove(2);
+    QVERIFY(om2.size() == 2);
+    QVERIFY(om2.keys().size() == 2);
+    QVERIFY(om2.value(3) == 3);
+    QVERIFY(om2.value(2) == 0); // default constructed value
+    QVERIFY(om2.value(1) == 1);
+}
+
+void TestOrderedMap::opMoveAssignTest()
+{
+    OrderedMap<int, int> om2;
+    om2 = genRValue();
+
+    QVERIFY(om2.size() == 3);
+    QVERIFY(om2.keys().size() == 3);
+    QVERIFY(om2.value(3) == 3);
+    QVERIFY(om2.value(2) == 2);
+    QVERIFY(om2.value(1) == 1);
+
+    om2.remove(2);
+    QVERIFY(om2.size() == 2);
+    QVERIFY(om2.keys().size() == 2);
+    QVERIFY(om2.value(3) == 3);
+    QVERIFY(om2.value(2) == 0); // default constructed value
+    QVERIFY(om2.value(1) == 1);
+}
+#endif
 
 void TestOrderedMap::opAssignTest()
 {
