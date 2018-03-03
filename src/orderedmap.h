@@ -1,6 +1,7 @@
 #ifndef ORDEREDMAP_H
 #define ORDEREDMAP_H
 
+#include <QtGlobal>
 #include <QHash>
 #include <QLinkedList>
 #include <QList>
@@ -48,6 +49,10 @@ public:
 
     OrderedMap(const OrderedMap<Key, Value>& other);
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
+    OrderedMap(OrderedMap<Key, Value>&& other);
+#endif
+
     void clear();
 
     bool contains(const Key &key) const;
@@ -75,6 +80,10 @@ public:
     QList<Value> values() const;
 
     OrderedMap<Key, Value> & operator=(const OrderedMap<Key, Value>& other);
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
+    OrderedMap<Key, Value> & operator=(OrderedMap<Key, Value>&& other);
+#endif
 
     bool operator==(const OrderedMap<Key, Value> &other) const;
 
@@ -334,6 +343,15 @@ OrderedMap<Key, Value>::OrderedMap(const OrderedMap<Key, Value>& other)
     copy(other);
 }
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
+template <typename Key, typename Value>
+OrderedMap<Key, Value>::OrderedMap(OrderedMap<Key, Value>&& other)
+{
+    data = std::move(other.data);
+    insertOrder = std::move(other.insertOrder);
+}
+#endif
+
 template <typename Key, typename Value>
 void OrderedMap<Key, Value>::clear()
 {
@@ -481,9 +499,23 @@ QList<Value> OrderedMap<Key, Value>::values() const
 template <typename Key, typename Value>
 OrderedMap<Key, Value> & OrderedMap<Key, Value>::operator=(const OrderedMap<Key, Value>& other)
 {
-    copy(other);
+    if (this != &other) {
+        copy(other);
+    }
     return *this;
 }
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
+template <typename Key, typename Value>
+OrderedMap<Key, Value> & OrderedMap<Key, Value>::operator=(OrderedMap<Key, Value>&& other)
+{
+    if (this != &other) {
+        data = other.data;
+        insertOrder = other.insertOrder;
+    }
+    return *this;
+}
+#endif
 
 template <typename Key, typename Value>
 bool OrderedMap<Key, Value>::operator==(const OrderedMap<Key, Value> &other) const
