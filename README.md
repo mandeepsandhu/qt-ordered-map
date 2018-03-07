@@ -22,6 +22,40 @@ om.insert(1,1);
 // Order of keys is [2, 1]
 ```
 
+Here, another example that shows a map of `QString` > `int`:
+
+```C++
+OrderedMap<QString, int> map;
+
+// put some values
+map["z-key"] = 10;
+map["a-key"] = 20;
+map["c-key"] = 15;
+
+// edit some values
+map["a-key"] = 21;
+
+QList<int> values = map.values();
+for (int i = 0; i < values.size(); i++) {
+    qDebug() << values[i];
+}
+
+// [Output will be]:
+// > 10
+// > 21
+// > 15
+
+QList<QString> keys = map.keys();
+for (int i = 0; i < keys.size(); i++) {
+    qDebug() << keys[i] << ">" << map[keys[i]];
+}
+
+// [Output will be]:
+// > "z-key" > 10
+// > "a-key" > 21
+// > "c-key" > 15
+```
+
 Requirements
 ============
 - The key type for the <code>OrderedMap</code> **must** provide <code>operator==()</code> and a global hash function called <code>qHash()</code>.
