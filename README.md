@@ -35,9 +35,8 @@ map["c-key"] = 15;
 // edit some values
 map["a-key"] = 21;
 
-QList<int> values = map.values();
-for (int i = 0; i < values.size(); i++) {
-    qDebug() << values[i];
+foreach (int value, map.values()) {
+    qDebug() << value;
 }
 
 // [Output will be]:
@@ -45,9 +44,8 @@ for (int i = 0; i < values.size(); i++) {
 // > 21
 // > 15
 
-QList<QString> keys = map.keys();
-for (int i = 0; i < keys.size(); i++) {
-    qDebug() << keys[i] << ">" << map[keys[i]];
+foreach (QString key, map.keys()) {
+    qDebug() << key << ">" << map[key];
 }
 
 // [Output will be]:
