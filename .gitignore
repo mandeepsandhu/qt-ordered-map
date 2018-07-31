@@ -19,6 +19,9 @@ moc_*.cpp
 qrc_*.cpp
 Makefile
 *build-*
+.qmake.stash
+.qmake.cache
+moc_predefs.h
 
 # Tests & examples
 examples/lrucache/lrucache
