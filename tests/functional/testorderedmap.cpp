@@ -10,6 +10,9 @@ class TestOrderedMap: public QObject
 
 private slots:
 
+#ifdef Q_COMPILER_INITIALIZER_LISTS
+    void initializerListCtorTest();
+#endif
     void containsTest();
     void clearSizeCountTest();
     void emptyAndIsEmptyTest();
@@ -38,6 +41,19 @@ private slots:
     void foreachTest();
     void iteratorOperatorsTest();
 };
+
+#ifdef Q_COMPILER_INITIALIZER_LISTS
+void TestOrderedMap::initializerListCtorTest()
+{
+    OrderedMap<int, QString> om = {std::make_pair<int, QString>(0, QString("0")),
+                                   std::make_pair<int, QString>(1, QString("1"))};
+    QVERIFY(om.contains(0));
+    QVERIFY(om.contains(1));
+    QVERIFY(om.value(0) == QString("0"));
+    QVERIFY(om.value(1) == QString("1"));
+
+}
+#endif
 
 void TestOrderedMap::containsTest()
 {
