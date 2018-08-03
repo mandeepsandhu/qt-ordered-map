@@ -57,7 +57,7 @@ public:
 
     OrderedMap(const OrderedMap<Key, Value>& other);
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
+#if (QT_VERSION >= 0x050200)
     OrderedMap(OrderedMap<Key, Value>&& other);
 #endif
 
@@ -89,7 +89,7 @@ public:
 
     OrderedMap<Key, Value> & operator=(const OrderedMap<Key, Value>& other);
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
+#if (QT_VERSION >= 0x050200)
     OrderedMap<Key, Value> & operator=(OrderedMap<Key, Value>&& other);
 #endif
 
@@ -362,7 +362,7 @@ OrderedMap<Key, Value>::OrderedMap(const OrderedMap<Key, Value>& other)
     copy(other);
 }
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
+#if (QT_VERSION >= 0x050200)
 template <typename Key, typename Value>
 OrderedMap<Key, Value>::OrderedMap(OrderedMap<Key, Value>&& other)
 {
@@ -524,7 +524,7 @@ OrderedMap<Key, Value> & OrderedMap<Key, Value>::operator=(const OrderedMap<Key,
     return *this;
 }
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
+#if (QT_VERSION >= 0x050200)
 template <typename Key, typename Value>
 OrderedMap<Key, Value> & OrderedMap<Key, Value>::operator=(OrderedMap<Key, Value>&& other)
 {

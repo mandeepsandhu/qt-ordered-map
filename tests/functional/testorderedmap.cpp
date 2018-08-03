@@ -23,7 +23,7 @@ private slots:
     void valuesTest();
     void copyConstructorTest();
     void opAssignTest();
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
+#if (QT_VERSION >= 0x050200)
     void moveConstructorTest();
     void opMoveAssignTest();
 #endif
@@ -275,7 +275,7 @@ void TestOrderedMap::copyConstructorTest()
     }
 }
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 2, 0))
+#if (QT_VERSION >= 0x050200)
 OrderedMap<int, int> genRValue()
 {
     OrderedMap<int, int> om1;
