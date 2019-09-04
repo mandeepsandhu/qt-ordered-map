@@ -416,6 +416,7 @@ typename OrderedMap<Key, Value>::iterator OrderedMap<Key, Value>::insert(const K
     QllIterator ioIter = insertOrder.insert(insertOrder.end(), key);
     pair.first = value;
     pair.second = ioIter;
+    data.insert(key, pair);
     return iterator(ioIter, &data);
 }
 

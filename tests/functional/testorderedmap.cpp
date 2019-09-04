@@ -21,6 +21,7 @@ private slots:
     void takeTest();
     void valueTest();
     void valuesTest();
+    void singleKeyMultipleValuesTest();
     void copyConstructorTest();
     void opAssignTest();
 #if (QT_VERSION >= 0x050200)
@@ -180,6 +181,14 @@ void TestOrderedMap::valueTest()
     QVERIFY(om.value(1) == 1);
     QVERIFY(om.value(0) == 0);
     QVERIFY(om.value(2) == 2);
+
+    // overwrite with different values
+    om.insert(0, 10);
+    om.insert(2, 20);
+
+    QVERIFY(om.value(1) == 1);
+    QVERIFY(om.value(0) == 10);
+    QVERIFY(om.value(2) == 20);
 }
 
 void TestOrderedMap::valuesTest()
@@ -202,6 +211,16 @@ void TestOrderedMap::valuesTest()
     foreach (int v, om.values()) {
         QVERIFY(v == ans[i++]);
     }
+}
+
+void TestOrderedMap::singleKeyMultipleValuesTest()
+{
+    OrderedMap<int, int> om;
+    for (int i=0; i<10; i++) {
+        om.insert(1, i);
+    }
+    // only last value is retained
+    QVERIFY(om.value(1) == 9);
 }
 
 void TestOrderedMap::copyConstructorTest()
