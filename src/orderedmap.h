@@ -38,9 +38,6 @@ class OrderedMap
     typedef typename QLinkedList<Key>::const_iterator QllConstIterator;
     typedef QPair<Value, QllIterator> OMHashValue;
 
-    typedef typename OMHash::iterator OMHashIterator;
-    typedef typename OMHash::const_iterator OMHashConstIterator;
-
 public:
 
     class iterator;
@@ -57,7 +54,7 @@ public:
 
     OrderedMap(const OrderedMap<Key, Value>& other);
 
-#if (QT_VERSION >= 0x050200)
+#ifdef Q_COMPILER_RVALUE_REFS
     OrderedMap(OrderedMap<Key, Value>&& other);
 #endif
 
@@ -89,7 +86,7 @@ public:
 
     OrderedMap<Key, Value> & operator=(const OrderedMap<Key, Value>& other);
 
-#if (QT_VERSION >= 0x050200)
+#ifdef Q_COMPILER_RVALUE_REFS
     OrderedMap<Key, Value> & operator=(OrderedMap<Key, Value>&& other);
 #endif
 
@@ -335,6 +332,9 @@ private:
         }
     };
 
+    typedef typename OMHash::iterator OMHashIterator;
+    typedef typename OMHash::const_iterator OMHashConstIterator;
+
 private:
     void copy(const OrderedMap<Key, Value> &other);
 
@@ -362,7 +362,7 @@ OrderedMap<Key, Value>::OrderedMap(const OrderedMap<Key, Value>& other)
     copy(other);
 }
 
-#if (QT_VERSION >= 0x050200)
+#ifdef Q_COMPILER_RVALUE_REFS
 template <typename Key, typename Value>
 OrderedMap<Key, Value>::OrderedMap(OrderedMap<Key, Value>&& other)
 {
@@ -525,7 +525,7 @@ OrderedMap<Key, Value> & OrderedMap<Key, Value>::operator=(const OrderedMap<Key,
     return *this;
 }
 
-#if (QT_VERSION >= 0x050200)
+#ifdef Q_COMPILER_RVALUE_REFS
 template <typename Key, typename Value>
 OrderedMap<Key, Value> & OrderedMap<Key, Value>::operator=(OrderedMap<Key, Value>&& other)
 {
